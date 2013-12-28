@@ -10,7 +10,7 @@ BOARD = BOARD_PCA10001
 #USE_SOFTDEVICE = S110
 
 SDK_PATH = $(HOME)/lib/sdk//nrf51822/
-TEMPLATE_PATH = $(HOME)/src/github.com/hlnd/nrf51-pure-gcc-setup/template/
+TEMPLATE_PATH = ./template/
 
 CFLAGS = -Os
 

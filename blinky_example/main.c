@@ -42,12 +42,12 @@ int main(void)
     nrf_gpio_pin_clear(LED_0);
     nrf_gpio_pin_set(LED_1);
     
-    nrf_delay_ms(100);
+    nrf_delay_ms(1000);
     
     nrf_gpio_pin_clear(LED_1);
     nrf_gpio_pin_set(LED_0);
     
-    nrf_delay_ms(100);
+    nrf_delay_ms(1000);
   }
 }
 
