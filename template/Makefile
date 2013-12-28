@@ -18,7 +18,7 @@ LIBRARY_PATHS += ../ $(SDK_INCLUDE_PATH)
 SOURCE_PATHS += ../ $(SDK_SOURCE_PATH) $(TEMPLATE_PATH) $(wildcard $(SDK_SOURCE_PATH)*/)
 
 ifeq ($(USE_SOFTDEVICE), S110)
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/ $(SDK_INCLUDE_PATH)ble/ble_services/ $(SDK_INCLUDE_PATH)ble/softdevice/ $(SDK_INCLUDE_PATH)/app_common/
+    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/ $(SDK_INCLUDE_PATH)ble/ble_services/ $(SDK_INCLUDE_PATH)ble/softdevice/ $(SDK_INCLUDE_PATH)/app_common/ $(SDK_INCLUDE_PATH)/s110/ $(SDK_INCLUDE_PATH)/sd_common/
     SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/ble_services/
     LINKER_SCRIPT ?= gcc_nrf51_s110.ld
     OUTPUT_NAME ?= $(addsuffix _s110, $(PROJECT_NAME))
