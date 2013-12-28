@@ -3,6 +3,7 @@ BOARD := BOARD_PCA10001
 DEVICE := NRF51
 
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
+CFLAGS += -g
 
 C_SOURCE_FILES += main.c
 C_SOURCE_FILES += battery.c
@@ -25,8 +26,8 @@ SDK_PATH = ../../../../
 
 
 #Uncomment correct line if you have s110 programmed on the chip.
-#DEVICE_VARIANT := xxaa
-DEVICE_VARIANT := xxab
+DEVICE_VARIANT := xxaa
+#DEVICE_VARIANT := xxab
 
 USE_SOFTDEVICE := S110
 
