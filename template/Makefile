@@ -29,11 +29,11 @@ else
 	SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/ble_services/
 	LINKER_SCRIPT ?= gcc_nrf51_s210.ld
 	OUTPUT_NAME ?= $(addsuffix _s210, $(PROJECT_NAME))
-    	FLASH_START_ADDRESS = 0xA000
+	FLASH_START_ADDRESS = 0xA000
     else
 	LINKER_SCRIPT ?= gcc_nrf51_blank.ld
 	OUTPUT_NAME ?= $(PROJECT_NAME)
-    	FLASH_START_ADDRESS = 0
+	FLASH_START_ADDRESS = 0
     endif
 endif 
 
@@ -57,7 +57,7 @@ HEX = $(OUTPUT_PATH)$(OUTPUT_NAME).hex
 ELF = $(OUTPUT_PATH)$(OUTPUT_NAME).elf
 BIN = $(OUTPUT_PATH)$(OUTPUT_NAME).bin
 
-SRCS = $(SYSTEM_FILE) $(notdir $(APPLICATION_SRCS))
+SRCS = $(SYSTEM_FILE) $(notdir $(C_SOURCE_FILES))
 OBJS = $(addprefix $(OUTPUT_PATH), $(SRCS:.c=.o))
 DEPS = $(addprefix $(OUTPUT_PATH), $(SRCS:.c=.d))
 SRCS_AS = $(START_CODE)

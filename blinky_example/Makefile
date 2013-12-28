@@ -1,5 +1,5 @@
 # List all source files the application uses.
-APPLICATION_SRCS = main.c  nrf_delay.c
+C_SOURCE_FILES = main.c  nrf_delay.c
 
 PROJECT_NAME = blinky
 
@@ -10,7 +10,7 @@ BOARD = BOARD_PCA10001
 #USE_SOFTDEVICE = S110
 
 SDK_PATH = $(HOME)/lib/sdk//nrf51822/
-TEMPLATE_PATH = ./template/
+TEMPLATE_PATH = ../template/
 
 CFLAGS = -Os
 
