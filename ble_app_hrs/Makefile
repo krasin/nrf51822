@@ -31,7 +31,7 @@ DEVICE_VARIANT := xxaa
 
 USE_SOFTDEVICE := S110
 
-SOFTDEVICE := $(HOME)/lib/softdevice/s110_nrf51822_5.2.1_softdevice.hex
+SOFTDEVICE := $(HOME)/lib/softdevice/s110_nrf51822_6.0.0_softdevice.hex
 SDK_PATH = $(HOME)/lib/sdk/nrf51822/
 TEMPLATE_PATH = ../template/
 
