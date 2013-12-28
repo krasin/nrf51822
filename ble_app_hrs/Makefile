@@ -34,4 +34,6 @@ SOFTDEVICE := $(HOME)/lib/softdevice/s110_nrf51822_5.2.1_softdevice.hex
 SDK_PATH = $(HOME)/lib/sdk/nrf51822/
 TEMPLATE_PATH = ../template/
 
+GDB_PORT_NUMBER = 2331
+
 include $(TEMPLATE_PATH)Makefile
