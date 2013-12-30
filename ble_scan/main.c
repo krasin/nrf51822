@@ -65,15 +65,6 @@ void dbg_packet(int channel, uint8_t* pdu) {
   log_uart("\n");
 }
 
-#define START_LFCLK()                                                       \
-  do {                                                                    \
-        NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal                       \
-    << CLOCK_LFCLKSRC_SRC_Pos;                  \
-        NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;                                 \
-        NRF_CLOCK->TASKS_LFCLKSTART = 1;                                    \
-        while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0);                        \
-  } while (0)
-
 #define START_RTC0()                                                        \
   do {                                                                    \
   NRF_RTC0->PRESCALER = RTC_PRESCALER;                                \
@@ -124,7 +115,10 @@ static void setup(void) {
   while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0UL);
 
   /* Start low frequency clock (32.768 kHz). */
-  START_LFCLK();
+  NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos;
+  NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
+  NRF_CLOCK->TASKS_LFCLKSTART = 1;
+  while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0);
 
   /* Start Real Timer Counter 0 (RTC0). */
   START_RTC0();
