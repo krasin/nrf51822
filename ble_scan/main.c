@@ -42,6 +42,29 @@
 #define SCAN_WINDOW     (MS(1) / RTC_PERIOD)
 #define SCAN_INTERVAL   (MS(2) / RTC_PERIOD)
 
+void dbg_packet(int channel, uint8_t* pdu) {
+  log_uart("Advertising channel %d\n", channel);
+  log_uart("CRC:      %s\n", (NRF_RADIO->CRCSTATUS == 1) ? "OK" : "FAIL");
+  log_uart("PDU Type: 0x%02x\n", pdu[0] & 0xF);
+  log_uart("TxAdd:    0x%02x\n", (pdu[0] >> 6) & 0x1);
+  log_uart("RxAdd:    0x%02x\n", (pdu[0] >> 7) & 0x1);
+  log_uart("Length:   0x%02x\n", pdu[1] & 0x3F);
+                                                 
+  uint8_t i;
+  uint8_t f = pdu[1] + 3;
+  log_uart("Payload: ");
+  for (i = 3; i < f; i++) {
+    log_uart("0x%02x ", pdu[i]);
+  }
+  log_uart("\n");
+
+  log_uart("Raw: ");
+  for (i = 0; i < MAX_PDU_SIZE; i++) {
+    log_uart("0x%02x ", pdu[i]);
+  }
+  log_uart("\n");
+}
+
 #define START_HFCLK()                                                       \
   do {                                                                    \
   NRF_CLOCK->EVENTS_HFCLKSTARTED = 0UL;                               \
@@ -64,27 +87,9 @@
   NRF_RTC0->TASKS_START = 1UL;                                        \
   } while (0)
 
-#define DBG_PACKET(channel, pdu)                                            \
+#define SCAN_CHANNEL(channel, window, pdu)                            \
   do {                                                                    \
-  log_uart("Advertising channel " #channel "\r\n");                   \
-  log_uart("CRC:      %s\r\n",                                        \
-	   (NRF_RADIO->CRCSTATUS == 1) ? "OK" : "FAIL");                   \
-  log_uart("PDU Type: 0x%02x\r\n", (pdu[0] >> 4) & 0xF);              \
-  log_uart("TxAdd:    0x%02x\r\n", (pdu[0] >> 1) & 0x1);              \
-  log_uart("RxAdd:    0x%02x\r\n", pdu[0] & 0x1);                     \
-  log_uart("Length:   0x%02x\r\n", pdu[1] & 0x3F);                    \
-                                                                            \
-  uint8_t i;                                                          \
-  uint8_t f = pdu[1] + 3;                                             \
-  log_uart("Payload:  ");                                             \
-  for (i = 3; i < f; i++) {                                           \
-  log_uart("0x%02X ", pdu[i]);                                    \
-  }                                                                   \
-  log_uart("\r\n");                                                   \
-  } while (0)
-
-#define SCAN_CHANNEL(name, channel, window, pdu)                            \
-  do {                                                                    \
+  memset(pdu, 0, MAX_PDU_SIZE);                                       \
   NRF_RADIO->FREQUENCY = channel;                                     \
                                                                             \
   NRF_RADIO->EVENTS_READY = 0UL;                                      \
@@ -101,7 +106,7 @@
   while (NRF_RADIO->EVENTS_DISABLED == 0UL);                          \
                                                                             \
   if (NRF_RADIO->EVENTS_END == 1UL)                                   \
-    DBG_PACKET(name, pdu);                                          \
+    dbg_packet(channel, pdu);                                         \
   } while (0)
 
 #define START_TIMERS(t1, t2) do { t1 = t2 = NRF_RTC0->COUNTER; } while (0)
@@ -116,8 +121,7 @@
 static uint8_t pdu[MAX_PDU_SIZE];
 static volatile uint32_t window, interval, tmp;
 
-static void __inline setup(void)
-{
+static void setup(void) {
   /* Start UART logging module. */
   log_uart_init();
 
@@ -213,30 +217,24 @@ int main(void)
 {
   setup();
 
-  // Configure LED-pins as outputs
-  nrf_gpio_cfg_output(LED_0);
-  nrf_gpio_cfg_output(LED_1);
-
-  nrf_gpio_pin_clear(LED_0);
-  nrf_gpio_pin_set(LED_1);
-
   while (1) {
-    log_uart("Scanning with wnd: %u ticks, interval: %u ticks\r\n",
-	     SCAN_WINDOW, SCAN_INTERVAL);
+    log_uart("Scanning...\n");
+    // log_uart("Scanning with wnd: %u ticks, interval: %u ticks\n",
+    //     SCAN_WINDOW, SCAN_INTERVAL);
 
     /* Advertising channel 37 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(37, ADV_CHANNEL_37, window, pdu);
+    SCAN_CHANNEL(ADV_CHANNEL_37, window, pdu);
     WAIT_INTERVAL(interval, tmp);
 
     /* Advertising channel 38 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(38, ADV_CHANNEL_38, window, pdu);
+    SCAN_CHANNEL(ADV_CHANNEL_38, window, pdu);
     WAIT_INTERVAL(interval, tmp);
 
     /* Advertising channel 39 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(39, ADV_CHANNEL_39, window, pdu);
+    SCAN_CHANNEL(ADV_CHANNEL_39, window, pdu);
     WAIT_INTERVAL(interval, tmp);
   }
 }
