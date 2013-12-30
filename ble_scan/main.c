@@ -65,12 +65,6 @@ void dbg_packet(int channel, uint8_t* pdu) {
   log_uart("\n");
 }
 
-#define START_RTC0()                                                        \
-  do {                                                                    \
-  NRF_RTC0->PRESCALER = RTC_PRESCALER;                                \
-  NRF_RTC0->TASKS_START = 1UL;                                        \
-  } while (0)
-
 #define SCAN_CHANNEL(channel, window, pdu)                            \
   do {                                                                    \
   memset(pdu, 0, MAX_PDU_SIZE);                                       \
@@ -121,7 +115,8 @@ static void setup(void) {
   while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0);
 
   /* Start Real Timer Counter 0 (RTC0). */
-  START_RTC0();
+  NRF_RTC0->PRESCALER = RTC_PRESCALER;
+  NRF_RTC0->TASKS_START = 1UL;
 
   /* Start to configure the RADIO.
    *
