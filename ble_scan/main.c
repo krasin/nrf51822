@@ -65,27 +65,26 @@ void dbg_packet(int channel, uint8_t* pdu) {
   log_uart("\n");
 }
 
-#define SCAN_CHANNEL(channel, window, pdu)                            \
-  do {                                                                    \
-  memset(pdu, 0, MAX_PDU_SIZE);                                       \
-  NRF_RADIO->FREQUENCY = channel;                                     \
-                                                                            \
-  NRF_RADIO->EVENTS_READY = 0UL;                                      \
-  NRF_RADIO->TASKS_RXEN = 1UL;                                        \
-  while (NRF_RADIO->EVENTS_READY == 0UL);                             \
-                                                                            \
-  NRF_RADIO->EVENTS_END = 0UL;                                        \
-  NRF_RADIO->TASKS_START = 1UL;                                       \
-  while (NRF_RADIO->EVENTS_END == 0UL                                 \
-	 && (NRF_RTC0->COUNTER - window < SCAN_WINDOW));             \
-                                                                            \
-  NRF_RADIO->EVENTS_DISABLED = 0UL;                                   \
-  NRF_RADIO->TASKS_DISABLE = 1UL;                                     \
-  while (NRF_RADIO->EVENTS_DISABLED == 0UL);                          \
-                                                                            \
-  if (NRF_RADIO->EVENTS_END == 1UL)                                   \
-    dbg_packet(channel, pdu);                                         \
-  } while (0)
+void scan_channel(int channel, uint32_t window, uint8_t* pdu) {
+  memset(pdu, 0, MAX_PDU_SIZE);
+  NRF_RADIO->FREQUENCY = channel;
+
+  NRF_RADIO->EVENTS_READY = 0UL;
+  NRF_RADIO->TASKS_RXEN = 1UL;
+  while (NRF_RADIO->EVENTS_READY == 0UL);
+
+  NRF_RADIO->EVENTS_END = 0UL;
+  NRF_RADIO->TASKS_START = 1UL;
+  while (NRF_RADIO->EVENTS_END == 0UL && (NRF_RTC0->COUNTER - window < SCAN_WINDOW));
+
+  NRF_RADIO->EVENTS_DISABLED = 0UL;
+  NRF_RADIO->TASKS_DISABLE = 1UL;
+  while (NRF_RADIO->EVENTS_DISABLED == 0UL);
+
+  if (NRF_RADIO->EVENTS_END == 1UL) {
+    dbg_packet(channel, pdu);
+  }
+}
 
 #define START_TIMERS(t1, t2) do { t1 = t2 = NRF_RTC0->COUNTER; } while (0)
 
@@ -208,17 +207,17 @@ int main(void)
 
     /* Advertising channel 37 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(ADV_CHANNEL_37, window, pdu);
+    scan_channel(ADV_CHANNEL_37, window, pdu);
     WAIT_INTERVAL(interval, tmp);
 
     /* Advertising channel 38 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(ADV_CHANNEL_38, window, pdu);
+    scan_channel(ADV_CHANNEL_38, window, pdu);
     WAIT_INTERVAL(interval, tmp);
 
     /* Advertising channel 39 */
     START_TIMERS(interval, window);
-    SCAN_CHANNEL(ADV_CHANNEL_39, window, pdu);
+    scan_channel(ADV_CHANNEL_39, window, pdu);
     WAIT_INTERVAL(interval, tmp);
   }
 }
