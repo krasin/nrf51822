@@ -65,13 +65,6 @@ void dbg_packet(int channel, uint8_t* pdu) {
   log_uart("\n");
 }
 
-#define START_HFCLK()                                                       \
-  do {                                                                    \
-  NRF_CLOCK->EVENTS_HFCLKSTARTED = 0UL;                               \
-  NRF_CLOCK->TASKS_HFCLKSTART = 1UL;                                  \
-  while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0UL);                      \
-  } while(0)
-
 #define START_LFCLK()                                                       \
   do {                                                                    \
         NRF_CLOCK->LFCLKSRC = CLOCK_LFCLKSRC_SRC_Xtal                       \
@@ -126,7 +119,9 @@ static void setup(void) {
   log_uart_init();
 
   /* Start high frequency clock (16 MHz). */
-  START_HFCLK();
+  NRF_CLOCK->EVENTS_HFCLKSTARTED = 0UL;
+  NRF_CLOCK->TASKS_HFCLKSTART = 1UL;
+  while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0UL);
 
   /* Start low frequency clock (32.768 kHz). */
   START_LFCLK();
