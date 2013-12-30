@@ -88,13 +88,13 @@ void scan_channel(int channel, uint32_t window, uint8_t* pdu) {
 
 #define START_TIMERS(t1, t2) do { t1 = t2 = NRF_RTC0->COUNTER; } while (0)
 
-#define WAIT_INTERVAL(interv, tmp)                                          \
-  do {                                                                    \
-  tmp = SCAN_INTERVAL - RTC_PERIOD * (NRF_RTC0->COUNTER - interv);    \
-  if (tmp <= SCAN_INTERVAL)                                           \
-    nrf_delay_ms(tmp);                                              \
-  } while (0)
 
+void wait_interval(uint32_t interval) {
+  uint32_t  tmp = SCAN_INTERVAL - RTC_PERIOD * (NRF_RTC0->COUNTER - interval);
+  if (tmp <= SCAN_INTERVAL) {
+    nrf_delay_ms(tmp);
+  }
+}
 
 static void setup(uint8_t* pdu) {
   /* Start UART logging module. */
@@ -195,7 +195,7 @@ static void setup(uint8_t* pdu) {
 
 int main(void)
 {
-  uint32_t window = 0, interval = 0, tmp = 0;
+  uint32_t window = 0, interval = 0;
   uint8_t pdu[MAX_PDU_SIZE];
   memset(pdu, 0, sizeof(pdu));
   setup(pdu);
@@ -208,16 +208,16 @@ int main(void)
     /* Advertising channel 37 */
     START_TIMERS(interval, window);
     scan_channel(ADV_CHANNEL_37, window, pdu);
-    WAIT_INTERVAL(interval, tmp);
+    wait_interval(interval);
 
     /* Advertising channel 38 */
     START_TIMERS(interval, window);
     scan_channel(ADV_CHANNEL_38, window, pdu);
-    WAIT_INTERVAL(interval, tmp);
+    wait_interval(interval);
 
     /* Advertising channel 39 */
     START_TIMERS(interval, window);
     scan_channel(ADV_CHANNEL_39, window, pdu);
-    WAIT_INTERVAL(interval, tmp);
+    wait_interval(interval);
   }
 }
