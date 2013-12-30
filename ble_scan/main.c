@@ -95,10 +95,8 @@ void scan_channel(int channel, uint32_t window, uint8_t* pdu) {
     nrf_delay_ms(tmp);                                              \
   } while (0)
 
-static uint8_t pdu[MAX_PDU_SIZE];
-static volatile uint32_t window, interval, tmp;
 
-static void setup(void) {
+static void setup(uint8_t* pdu) {
   /* Start UART logging module. */
   log_uart_init();
 
@@ -193,12 +191,14 @@ static void setup(void) {
 
     /* Set the pointer to write the incoming packet. */
     NRF_RADIO->PACKETPTR = (uint32_t) pdu;
-    memset(pdu, 0, sizeof(pdu));
 }
 
 int main(void)
 {
-  setup();
+  uint32_t window = 0, interval = 0, tmp = 0;
+  uint8_t pdu[MAX_PDU_SIZE];
+  memset(pdu, 0, sizeof(pdu));
+  setup(pdu);
 
   while (1) {
     log_uart("Scanning...\n");
