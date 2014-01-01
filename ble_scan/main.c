@@ -39,12 +39,22 @@
 #define SCAN_INTERVAL   (MS(2) / RTC_PERIOD)
 
 void dbg_packet(int channel, uint8_t* pdu) {
+  int pdu_type = pdu[0] & 0xF;
+  int len = pdu[1] & 0x3F;
   log_uart("Advertising channel %d\n", channel);
   log_uart("CRC:      %s\n", (NRF_RADIO->CRCSTATUS == 1) ? "OK" : "FAIL");
-  log_uart("PDU Type: 0x%02x\n", pdu[0] & 0xF);
+  log_uart("PDU Type: 0x%02x\n", pdu_type);
   log_uart("TxAdd:    0x%02x\n", (pdu[0] >> 6) & 0x1);
   log_uart("RxAdd:    0x%02x\n", (pdu[0] >> 7) & 0x1);
-  log_uart("Length:   0x%02x\n", pdu[1] & 0x3F);
+  log_uart("Length:   0x%02x\n", len);
+
+  if (pdu_type == 0 /* ADV_IND */) {
+    log_uart("Address: %02x:%02x:%02x:%02x:%02x:%02x ", pdu[8], pdu[7], pdu[6], pdu[5], pdu[4], pdu[3]);
+    for (int i = 9; i < len; i++) {
+      log_uart("%c", pdu[i]);
+    }
+    log_uart("\n");
+  }
                                                  
   uint8_t i;
   uint8_t f = pdu[1] + 3;
