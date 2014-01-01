@@ -50,8 +50,24 @@ void dbg_packet(int channel, uint8_t* pdu) {
 
   if (pdu_type == 0 /* ADV_IND */) {
     log_uart("Address: %02x:%02x:%02x:%02x:%02x:%02x ", pdu[8], pdu[7], pdu[6], pdu[5], pdu[4], pdu[3]);
-    for (int i = 9; i < len; i++) {
-      log_uart("%c", pdu[i]);
+    int i = 9;
+    while (i < len) {
+      int curlen = pdu[i];
+      i++;
+      if (curlen == 0) {
+	continue;
+      }
+      int curtyp = pdu[i];
+      log_uart("(%d: ", curtyp);
+      for (int j = 1; j < curlen; j++) {
+	if (curtyp == 9) {
+	  log_uart("%c", pdu[i+j]);
+	} else {
+	  log_uart("%02x ", pdu[i+j]);
+	}
+      }
+      i += curlen;
+      log_uart(") ");
     }
     log_uart("\n");
   }
