@@ -32,10 +32,6 @@
 #define SET_BIT(n)      (1UL << n)
 #define MAX_PDU_SIZE    (64UL)
 
-#define ADV_CHANNEL_37  (2UL)       /* 2402 MHz */
-#define ADV_CHANNEL_38  (26UL)      /* 2426 MHz */
-#define ADV_CHANNEL_39  (80UL)      /* 2480 MHz */
-
 #define MS(s)           (1000 * s)
 #define RTC_PERIOD      (5)         /* ms */
 #define RTC_PRESCALER   (((32768 * RTC_PERIOD) / 1000) - 1)
@@ -65,9 +61,30 @@ void dbg_packet(int channel, uint8_t* pdu) {
   log_uart("\n");
 }
 
+static __inline int8_t ch2freq(uint8_t ch)
+{
+  switch (ch) {
+  case 37:
+    return 2;
+  case 38:
+    return 26;
+  case 39:
+    return 80;
+  default:
+    if (ch > 39)
+      return -1;
+    else if (ch < 11)
+      return 4 + (2 * ch);
+    else
+      return 6 + (2 * ch);
+  }
+}
+
 void scan_channel(int channel, uint32_t window, uint8_t* pdu) {
+  NRF_RADIO->DATAWHITEIV = channel & 0x3F;
+
   memset(pdu, 0, MAX_PDU_SIZE);
-  NRF_RADIO->FREQUENCY = channel;
+  NRF_RADIO->FREQUENCY = ch2freq(channel);
 
   NRF_RADIO->EVENTS_READY = 0UL;
   NRF_RADIO->TASKS_RXEN = 1UL;
@@ -207,17 +224,17 @@ int main(void)
 
     /* Advertising channel 37 */
     START_TIMERS(interval, window);
-    scan_channel(ADV_CHANNEL_37, window, pdu);
+    scan_channel(37, window, pdu);
     wait_interval(interval);
 
     /* Advertising channel 38 */
     START_TIMERS(interval, window);
-    scan_channel(ADV_CHANNEL_38, window, pdu);
+    scan_channel(38, window, pdu);
     wait_interval(interval);
 
     /* Advertising channel 39 */
     START_TIMERS(interval, window);
-    scan_channel(ADV_CHANNEL_39, window, pdu);
+    scan_channel(39, window, pdu);
     wait_interval(interval);
   }
 }
