@@ -30,9 +30,17 @@
 #include "boards.h"
 
 // Packet to transmit
-static uint8_t packet[] = { 0x40, 0x13, 0x00,
-			    0x90, 0xD8, 0x7A, 0xBD, 0xA3, 0xED,
-			    0x0B, 0x09, 0x42, 0x75, 0x74, 0x6F, 0x76, 0x6f, 0x2d, 0x34, 0x2e, 0x30 };  
+static uint8_t packet[] = { 0x00, 0x13, 0x00, // ADV_IND, public addr
+			    0x90, 0xD8, 0x7A, 0xBD, 0xA3, 0xED, // Address
+			    0x0C, 0x09, 0x42, 0x75, 0x74, 0x6F, 0x76, 0x6f, 0x2d, 0x34, 0x2e, 0x30, 0x30 };  
+
+static uint8_t scan_rsp[] = {
+  0x04, 0x1c, 0x00, // SCAN_RESP, public addr
+  0x90, 0xD8, 0x7A, 0xBD, 0xA3, 0xED, // Address
+  0x0C, 0x09, 0x42, 0x75, 0x74, 0x6F, 0x76, 0x6f, 0x2d, 0x34, 0x2e, 0x30, 0x30, // Complete Local Name
+  0x05, 0x12, 0x50, 0x00, 0x20, 0x03, // Slave Connection Interval Range
+  0x02, 0x0a, 0x00, // Tx Power Level 
+};
 
 static __inline int8_t ch2freq(uint8_t ch)
 {
@@ -70,7 +78,7 @@ void init(void)
   simple_uart_config(RTS_PIN_NUMBER, TX_PIN_NUMBER, CTS_PIN_NUMBER, RX_PIN_NUMBER, HWFC);
 
   // Set payload pointer
-  NRF_RADIO->PACKETPTR = (uint32_t)packet;  
+  //NRF_RADIO->PACKETPTR = (uint32_t)scan_rsp; //packet;  
 
 
   // We will only announce on channel 37 for now
@@ -88,8 +96,10 @@ int main(void)
 {
   init();
 
-  while(true)
-  {
+  for (int i =0; true; i++) {
+    // Set payload pointer
+    NRF_RADIO->PACKETPTR = (uint32_t) (i%2==0? packet:scan_rsp);  
+
     NRF_RADIO->EVENTS_READY = 0U;
     NRF_RADIO->TASKS_TXEN = 1;
     while (NRF_RADIO->EVENTS_READY == 0U)
@@ -106,7 +116,11 @@ int main(void)
     while(NRF_RADIO->EVENTS_DISABLED == 0U)
     {
     }
-    nrf_delay_ms(100);
+    if (i%2 == 0) {
+      nrf_delay_us(200);
+    } else {
+      nrf_delay_ms(3);
+    }
   }
 }
 
